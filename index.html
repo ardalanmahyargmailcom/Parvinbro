@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>جدول بازی فوتبال</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            direction: rtl; /* راست به چپ برای فارسی */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="text"] {
+            width: 50px;
+            padding: 5px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>جدول بازی فوتبال</h1>
+
+    <h2>جدول بازی ها</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>بازی</th>
+                <th>تیم 1</th>
+                <th>تیم 2</th>
+                <th>نتیجه تیم 1</th>
+                <th>نتیجه تیم 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>نوید</td>
+                <td>رامیار</td>
+                <td><input type="text" id="result1-1" class="result-input" data-game="1" data-team="1"></td>
+                <td><input type="text" id="result1-2" class="result-input" data-game="1" data-team="2"></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>نوید</td>
+                <td>فرشید</td>
+                <td><input type="text" id="result2-1" class="result-input" data-game="2" data-team="1"></td>
+                <td><input type="text" id="result2-2" class="result-input" data-game="2" data-team="2"></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>نوید</td>
+                <td>مهیار</td>
+                <td><input type="text" id="result3-1" class="result-input" data-game="3" data-team="1"></td>
+                <td><input type="text" id="result3-2" class="result-input" data-game="3" data-team="2"></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>رامیار</td>
+                <td>فرشید</td>
+                <td><input type="text" id="result4-1" class="result-input" data-game="4" data-team="1"></td>
+                <td><input type="text" id="result4-2" class="result-input" data-game="4" data-team="2"></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>رامیار</td>
+                <td>مهیار</td>
+                <td><input type="text" id="result5-1" class="result-input" data-game="5" data-team="1"></td>
+                <td><input type="text" id="result5-2" class="result-input" data-game="5" data-team="2"></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>فرشید</td>
+                <td>مهیار</td>
+                <td><input type="text" id="result6-1" class="result-input" data-game="6" data-team="1"></td>
+                <td><input type="text" id="result6-2" class="result-input" data-game="6" data-team="2"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button onclick="calculateRanking()">محاسبه رتبه بندی</button>
+
+    <h2>جدول رده بندی</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>رتبه</th>
+                <th>تیم</th>
+                <th>امتیاز</th>
+                <th>تفاضل گل</th>
+                <th>گل زده</th>
+            </tr>
+        </thead>
+        <tbody id="ranking-table-body">
+            <tr>
+                <td>1</td>
+                <td id="rank1-team"></td>
+                <td id="rank1-points"></td>
+                <td id="rank1-gd"></td>
+                <td id="rank1-gs"></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td id="rank2-team"></td>
+                <td id="rank2-points"></td>
+                <td id="rank2-gd"></td>
+                <td id="rank2-gs"></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td id="rank3-team"></td>
+                <td id="rank3-points"></td>
+                <td id="rank3-gd"></td>
+                <td id="rank3-gs"></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td id="rank4-team"></td>
+                <td id="rank4-points"></td>
+                <td id="rank4-gd"></td>
+                <td id="rank4-gs"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const teams = ["نوید", "رامیار", "فرشید", "مهیار"];
+        const schedule = [
+            ["نوید", "رامیار"],
+            ["نوید", "فرشید"],
+            ["نوید", "مهیار"],
+            ["رامیار", "فرشید"],
+            ["رامیار", "مهیار"],
+            ["فرشید", "مهیار"]
+        ];
+        let results = {};
+
+        // Load results from local storage on page load
+        window.onload = function() {
+            const storedResults = localStorage.getItem('footballResults');
+            if (storedResults) {
+                results = JSON.parse(storedResults);
+                // Populate input fields with stored results
+                for (let i = 1; i <= schedule.length; i++) {
+                    if (results[i] && results[i].length === 2) {
+                        document.getElementById(`result${i}-1`).value = results[i][0] || '';
+                        document.getElementById(`result${i}-2`).value = results[i][1] || '';
+                    }
+                }
+                calculateRanking();
+            }
+        };
+
+
+        function calculateRanking() {
+            // Reset points, goalDifference, and goalsScored at the beginning of the function
+            const points = { "نوید": 0, "رامیار": 0, "فرشید": 0, "مهیار": 0 };
+            const goalDifference = { "نوید": 0, "رامیار": 0, "فرشید": 0, "مهیار": 0 };
+            const goalsScored = { "نوید": 0, "رامیار": 0, "فرشید": 0, "مهیار": 0 };
+            let playedGames = 0;
+            results = {}; // Reset results object to recalculate from current input values
+
+            const resultInputs = document.querySelectorAll('.result-input');
+            resultInputs.forEach(input => {
+                const gameNumber = input.dataset.game;
+                const teamNumber = input.dataset.team;
+                const score = parseInt(input.value) || 0;
+                const match = schedule[gameNumber - 1];
+                const team1 = match[0];
+                const team2 = match[1];
+
+                if (results[gameNumber] === undefined) {
+                    results[gameNumber] = [];
+                }
+                results[gameNumber][teamNumber - 1] = score;
+            });
+
+            // Save results to local storage
+            localStorage.setItem('footballResults', JSON.stringify(results));
+
+
+            for (let i = 1; i <= schedule.length; i++) {
+                const gameNumber = i.toString();
+                const match = schedule[i - 1];
+                const team1 = match[0];
+                const team2 = match[1];
+                const team1Goals = results[gameNumber] ? results[gameNumber][0] : NaN;
+                const team2Goals = results[gameNumber] ? results[gameNumber][1] : NaN;
+
+                if (!isNaN(team1Goals) && !isNaN(team2Goals)) {
+                    playedGames++;
+
+                    goalsScored[team1] += team1Goals;
+                    goalsScored[team2] += team2Goals;
+
+                    goalDifference[team1] += team1Goals - team2Goals;
+                    goalDifference[team2] += team2Goals - team1Goals;
+
+                    if (team1Goals > team2Goals) {
+                        points[team1] += 3;
+                    } else if (team2Goals > team1Goals) {
+                        points[team2] += 3;
+                    } else {
+                        points[team1] += 1;
+                        points[team2] += 1;
+                    }
+                }
+            }
+
+            const rankedTeams = Object.keys(points).sort((a, b) => {
+                if (points[b] - points[a] !== 0) {
+                    return points[b] - points[a];
+                }
+                if (goalDifference[b] - goalDifference[a] !== 0) {
+                    return goalDifference[b] - goalDifference[a];
+                }
+                return goalsScored[b] - goalsScored[a];
+            });
+
+            for (let i = 0; i < rankedTeams.length; i++) {
+                const team = rankedTeams[i];
+                document.getElementById(`rank${i + 1}-team`).textContent = team;
+                document.getElementById(`rank${i + 1}-points`).textContent = points[team];
+                document.getElementById(`rank${i + 1}-gd`).textContent = goalDifference[team];
+                document.getElementById(`rank${i + 1}-gs`).textContent = goalsScored[team];
+            }
+        }
+    </script>
+
+</body>
+</html>
+
